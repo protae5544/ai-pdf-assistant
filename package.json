@@ -1,0 +1,8 @@
+{
+  "name": "ai-pdf-assistant",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@netlify/ai": "^1.0.0"
+  }
+}
