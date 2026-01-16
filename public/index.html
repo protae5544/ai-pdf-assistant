@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI PDF Assistant - ผู้ช่วยสร้าง PDF Templates</title>
+  <title>AI PDF Assistant - Dashboard</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -19,420 +19,342 @@
       justify-content: center;
       align-items: center;
       padding: 20px;
+      color: #1f2937;
     }
-    
-    .container {
+
+    .dashboard {
       width: 100%;
-      max-width: 900px;
-      height: 85vh;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 1200px;
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
     }
-    
-    .header {
+
+    .dashboard-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 24px;
-      text-align: center;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
     }
-    
-    .header h1 {
+
+    .dashboard-header h1 {
       font-size: 24px;
-      margin-bottom: 8px;
       font-weight: 600;
     }
-    
-    .header p {
+
+    .header-meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
       font-size: 14px;
-      opacity: 0.9;
+      opacity: 0.95;
     }
-    
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px;
+
+    .header-pill {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 6px 12px;
+      border-radius: 999px;
+    }
+
+    .dashboard-body {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 24px;
+      padding: 24px 32px 32px;
+      background: #f8f9fb;
+    }
+
+    .panel {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
       display: flex;
       flex-direction: column;
       gap: 16px;
-      background: #f8f9fa;
+      min-height: 520px;
     }
-    
-    .message {
-      display: flex;
-      gap: 12px;
-      max-width: 85%;
-      animation: slideIn 0.3s ease;
-    }
-    
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .message.user {
-      align-self: flex-end;
-      flex-direction: row-reverse;
-    }
-    
-    .message.assistant {
-      align-self: flex-start;
-    }
-    
-    .avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
+
+    .panel-title {
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 12px;
+    }
+
+    .panel-title h2 {
       font-size: 18px;
-      flex-shrink: 0;
+      font-weight: 600;
+      color: #111827;
     }
-    
-    .message.user .avatar {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    
-    .message.assistant .avatar {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    }
-    
-    .bubble {
-      padding: 14px 18px;
-      border-radius: 16px;
-      line-height: 1.6;
-      word-wrap: break-word;
-    }
-    
-    .message.user .bubble {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border-bottom-right-radius: 4px;
-    }
-    
-    .message.assistant .bubble {
-      background: white;
-      color: #333;
-      border-bottom-left-radius: 4px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .bubble pre {
-      background: #2d2d2d;
-      color: #f8f8f2;
-      padding: 12px;
-      border-radius: 8px;
-      overflow-x: auto;
-      margin: 12px 0;
-      font-size: 13px;
-      font-family: 'Courier New', monospace;
-    }
-    
-    .bubble code {
-      background: #f0f0f0;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 13px;
-      font-family: 'Courier New', monospace;
-    }
-    
-    .bubble pre code {
-      background: transparent;
-      padding: 0;
-    }
-    
-    .loading {
-      align-self: flex-start;
-      display: flex;
-      gap: 12px;
-      max-width: 85%;
-    }
-    
-    .loading .bubble {
-      background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      padding: 14px 18px;
-      display: flex;
-      gap: 6px;
-    }
-    
-    .dot {
-      width: 8px;
-      height: 8px;
-      background: #667eea;
-      border-radius: 50%;
-      animation: bounce 1.4s infinite ease-in-out both;
-    }
-    
-    .dot:nth-child(1) { animation-delay: -0.32s; }
-    .dot:nth-child(2) { animation-delay: -0.16s; }
-    
-    @keyframes bounce {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1); }
-    }
-    
-    .input-area {
-      padding: 20px;
-      background: white;
-      border-top: 1px solid #e0e0e0;
-      display: flex;
-      gap: 12px;
-    }
-    
-    .input-wrapper {
-      flex: 1;
-      position: relative;
-    }
-    
-    #userInput {
-      width: 100%;
-      padding: 14px 18px;
-      border: 2px solid #e0e0e0;
-      border-radius: 24px;
-      font-size: 15px;
-      outline: none;
-      transition: all 0.3s;
-      font-family: inherit;
-    }
-    
-    #userInput:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    
-    #sendBtn {
-      width: 50px;
-      height: 50px;
-      border: none;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 20px;
-      transition: all 0.3s;
-      display: flex;
+
+    .panel-title span {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
+      background: #eef2ff;
+      font-size: 20px;
     }
-    
-    #sendBtn:hover:not(:disabled) {
-      transform: scale(1.05);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+
+    .step-list {
+      display: grid;
+      gap: 12px;
     }
-    
-    #sendBtn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .welcome {
-      text-align: center;
-      padding: 40px 20px;
-      color: #666;
-    }
-    
-    .welcome h2 {
-      color: #333;
-      margin-bottom: 16px;
-      font-size: 22px;
-    }
-    
-    .welcome ul {
-      list-style: none;
-      margin-top: 20px;
-    }
-    
-    .welcome li {
-      padding: 12px;
-      margin: 8px 0;
-      background: white;
+
+    .step {
+      background: #f3f4f6;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 14px;
     }
-    
-    @media (max-width: 768px) {
-      .container {
-        height: 100vh;
-        border-radius: 0;
+
+    .step strong {
+      color: #111827;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      font-family: inherit;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: #1f2937;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(15, 23, 42, 0.1);
+    }
+
+    .preview-card {
+      border-radius: 16px;
+      border: 1px dashed #d1d5db;
+      background: #f9fafb;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .preview-frame {
+      flex: 1;
+      border: none;
+      border-radius: 12px;
+      background: white;
+      min-height: 320px;
+    }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .insight {
+      background: #eef2ff;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #4338ca;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .insight strong {
+      font-size: 16px;
+      color: #312e81;
+    }
+
+    @media (max-width: 960px) {
+      .dashboard-body {
+        grid-template-columns: 1fr;
       }
-      
-      .header h1 {
-        font-size: 20px;
-      }
-      
-      .header p {
-        font-size: 13px;
-      }
-      
-      .message {
-        max-width: 90%;
+
+      .panel {
+        min-height: auto;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>🤖 AI PDF Assistant</h1>
-      <p>ผู้ช่วยสร้าง PDF Templates และ Server-side PDF Generation</p>
-    </div>
-    
-    <div class="messages" id="messages">
-      <div class="welcome">
-        <h2>ยินดีต้อนรับ! 👋</h2>
-        <p>ผมพร้อมช่วยคุณในเรื่อง:</p>
-        <ul>
-          <li>📄 สร้าง HTML/SVG templates สำหรับ PDF</li>
-          <li>⚙️ พัฒนา API สำหรับ PDF generation</li>
-          <li>🗄️ ออกแบบระบบ database สำหรับเอกสาร</li>
-          <li>🚀 ติดตั้งและใช้งาน Puppeteer, PDFKit</li>
-        </ul>
+  <div class="dashboard">
+    <header class="dashboard-header">
+      <div>
+        <h1>🤖 AI PDF Assistant Dashboard</h1>
+        <p>ศูนย์กลางการสร้างและพรีวิว PDF ด้วย WebView เดียวกัน</p>
       </div>
-    </div>
-    
-    <div class="input-area">
-      <div class="input-wrapper">
-        <input 
-          type="text" 
-          id="userInput" 
-          placeholder="พิมพ์คำถามของคุณ... (กด Enter เพื่อส่ง)"
-          autocomplete="off"
-        >
+      <div class="header-meta">
+        <div class="header-pill">สถานะ: พร้อมใช้งาน</div>
+        <div class="header-pill">โหมด: PDF WebView</div>
+        <div class="header-pill">ทีมงาน: Template Studio</div>
       </div>
-      <button id="sendBtn" title="ส่งข้อความ">
-        ➤
-      </button>
-    </div>
-  </div>
+    </header>
 
-  <script>
-    let history = [];
-    const messagesDiv = document.getElementById('messages');
-    const userInput = document.getElementById('userInput');
-    const sendBtn = document.getElementById('sendBtn');
-    
-    userInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
-    
-    sendBtn.addEventListener('click', sendMessage);
-    
-    async function sendMessage() {
-      const message = userInput.value.trim();
-      if (!message) return;
-      
-      const welcome = messagesDiv.querySelector('.welcome');
-      if (welcome) welcome.remove();
-      
-      addMessage(message, 'user');
-      userInput.value = '';
-      userInput.disabled = true;
-      sendBtn.disabled = true;
-      
-      const loadingEl = showLoading();
-      
-      try {
-        const response = await fetch('/.netlify/functions/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message, history })
-        });
-        
-        loadingEl.remove();
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          addMessage(data.message, 'assistant');
-          history = data.history;
-        } else {
-          addMessage('❌ ' + (data.error || 'เกิดข้อผิดพลาด'), 'assistant');
-        }
-        
-      } catch (error) {
-        loadingEl.remove();
-        addMessage('❌ ไม่สามารถเชื่อมต่อได้: ' + error.message, 'assistant');
-      }
-      
-      userInput.disabled = false;
-      sendBtn.disabled = false;
-      userInput.focus();
-    }
-    
-    function addMessage(text, role) {
-      const messageEl = document.createElement('div');
-      messageEl.className = `message ${role}`;
-      
-      const avatar = document.createElement('div');
-      avatar.className = 'avatar';
-      avatar.textContent = role === 'user' ? '👤' : '🤖';
-      
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      
-      text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-        return `<pre><code>${escapeHtml(code.trim())}</code></pre>`;
-      });
-      
-      text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
-      
-      text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
-      
-      text = text.replace(/\n/g, '<br>');
-      
-      bubble.innerHTML = text;
-      
-      messageEl.appendChild(avatar);
-      messageEl.appendChild(bubble);
-      messagesDiv.appendChild(messageEl);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-    
-    function showLoading() {
-      const loadingEl = document.createElement('div');
-      loadingEl.className = 'loading';
-      
-      const avatar = document.createElement('div');
-      avatar.className = 'avatar';
-      avatar.textContent = '🤖';
-      
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-      
-      loadingEl.appendChild(avatar);
-      loadingEl.appendChild(bubble);
-      messagesDiv.appendChild(loadingEl);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      
-      return loadingEl;
-    }
-    
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-  </script>
+    <main class="dashboard-body">
+      <section class="panel">
+        <div class="panel-title">
+          <span>🧩</span>
+          <div>
+            <h2>ส่วนสร้าง PDF Template</h2>
+            <p>รวมฟังก์ชันการออกแบบ, ตั้งค่า, และเตรียมข้อมูลก่อนเรนเดอร์</p>
+          </div>
+        </div>
+
+        <div class="step-list">
+          <div class="step">
+            <strong>ขั้นตอนที่ 1</strong>
+            <span>กำหนดประเภทเอกสารและโครงร่างเนื้อหา</span>
+          </div>
+          <div class="step">
+            <strong>ขั้นตอนที่ 2</strong>
+            <span>อัปโหลดโลโก้/พื้นหลัง และเชื่อมชุดข้อมูล JSON</span>
+          </div>
+          <div class="step">
+            <strong>ขั้นตอนที่ 3</strong>
+            <span>ส่งต่อให้ PDF WebView เพื่อแสดงตัวอย่างแบบเรียลไทม์</span>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <label for="templateName">ชื่อเทมเพลต</label>
+            <input id="templateName" type="text" placeholder="เช่น ใบเสนอราคา Q4" />
+          </div>
+          <div>
+            <label for="docType">ประเภทเอกสาร</label>
+            <select id="docType">
+              <option>Invoice / ใบแจ้งหนี้</option>
+              <option>Quotation / ใบเสนอราคา</option>
+              <option>Report / รายงานผล</option>
+              <option>Certificate / ใบรับรอง</option>
+            </select>
+          </div>
+          <div>
+            <label for="dataSource">Data Source (JSON)</label>
+            <textarea id="dataSource" placeholder='{"customer":"ACME","total":24000}'></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary">บันทึกเทมเพลต</button>
+          <button class="secondary">รีเซ็ตฟอร์ม</button>
+        </div>
+
+        <div class="insight-grid">
+          <div class="insight">
+            <span>เอกสารที่กำลังใช้งาน</span>
+            <strong>12 Templates</strong>
+          </div>
+          <div class="insight">
+            <span>คิวการเรนเดอร์วันนี้</span>
+            <strong>38 Jobs</strong>
+          </div>
+          <div class="insight">
+            <span>เวลาเฉลี่ยต่อหน้า</span>
+            <strong>1.2s</strong>
+          </div>
+          <div class="insight">
+            <span>คุณภาพการพรีวิว</span>
+            <strong>HD</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <span>🖥️</span>
+          <div>
+            <h2>ส่วนแสดงผลเบื้องต้น (PDF WebView)</h2>
+            <p>แยกพื้นที่พรีวิวเพื่อให้เห็นผลการเรนเดอร์อย่างชัดเจน</p>
+          </div>
+        </div>
+
+        <div class="preview-card">
+          <div class="preview-header">
+            <span>Preview ล่าสุด: Invoice Sample</span>
+            <span>อัปเดตเมื่อ 10:24</span>
+          </div>
+          <iframe class="preview-frame" src="sample.pdf" title="PDF Preview"></iframe>
+        </div>
+
+        <div class="step-list">
+          <div class="step">
+            <strong>โหมดตรวจสอบ</strong>
+            <span>ตรวจสอบสี โลโก้ ระยะขอบ และฟอนต์ก่อนส่งออกจริง</span>
+          </div>
+          <div class="step">
+            <strong>โหมดส่งต่อทีม</strong>
+            <span>แชร์ลิงก์พรีวิวเพื่อให้ทีมตรวจทานได้ทันที</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 </body>
 </html>
